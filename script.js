@@ -30,13 +30,19 @@ function addTask() {
 }
 
 function displayTasks() {
+  // Sort the todo array: unchecked items first, then checked items
+  todo.sort((a, b) => {
+    if (a.disabled === b.disabled) return 0;
+    return a.disabled ? 1 : -1;
+  });
+
   todoList.innerHTML = "";
   todo.forEach((item, index) => {
     const p = document.createElement("p");
-    p.setAttribute("draggable", "true"); // Make element draggable
-    p.setAttribute("data-index", index); // Store the index for drag and drop
+    p.setAttribute('draggable', 'true');
+    p.setAttribute('data-index', index);
     p.innerHTML = `
-      <div class="todo-container">
+      <div class="todo-container ${item.disabled ? 'completed-task' : ''}">
         <div class="drag-handle">☰</div>
         <input type="checkbox" class="todo-checkbox" id="input-${index}" ${
       item.disabled ? "checked" : ""
@@ -46,14 +52,14 @@ function displayTasks() {
     }" onclick="editTask(${index})">${item.text}</p>
       </div>
     `;
-
+    
     // Add drag and drop event listeners
-    p.addEventListener("dragstart", handleDragStart);
-    p.addEventListener("dragover", handleDragOver);
-    p.addEventListener("drop", handleDrop);
-    p.addEventListener("dragenter", handleDragEnter);
-    p.addEventListener("dragleave", handleDragLeave);
-
+    p.addEventListener('dragstart', handleDragStart);
+    p.addEventListener('dragover', handleDragOver);
+    p.addEventListener('drop', handleDrop);
+    p.addEventListener('dragenter', handleDragEnter);
+    p.addEventListener('dragleave', handleDragLeave);
+    
     p.querySelector(".todo-checkbox").addEventListener("change", () =>
       toggleTask(index)
     );
@@ -68,45 +74,44 @@ let draggedItemIndex = null;
 
 function handleDragStart(e) {
   draggedItem = this;
-  draggedItemIndex = parseInt(this.getAttribute("data-index"));
-  this.style.opacity = "0.4";
-
-  // Add visual feedback
-  e.dataTransfer.effectAllowed = "move";
-  this.classList.add("dragging");
+  draggedItemIndex = parseInt(this.getAttribute('data-index'));
+  this.style.opacity = '0.4';
+  
+  e.dataTransfer.effectAllowed = 'move';
+  this.classList.add('dragging');
 }
 
 function handleDragOver(e) {
   e.preventDefault();
-  e.dataTransfer.dropEffect = "move";
+  e.dataTransfer.dropEffect = 'move';
 }
 
 function handleDragEnter(e) {
-  this.classList.add("drag-over");
+  this.classList.add('drag-over');
 }
 
 function handleDragLeave(e) {
-  this.classList.remove("drag-over");
+  this.classList.remove('drag-over');
 }
 
 function handleDrop(e) {
   e.preventDefault();
   if (draggedItem === this) return;
-
+  
   // Get the index where we're dropping
-  const dropIndex = parseInt(this.getAttribute("data-index"));
-
+  const dropIndex = parseInt(this.getAttribute('data-index'));
+  
   // Reorder the todo array
   const itemToMove = todo[draggedItemIndex];
   todo.splice(draggedItemIndex, 1);
   todo.splice(dropIndex, 0, itemToMove);
-
+  
   // Save and refresh display
   saveToLocalStorage();
   displayTasks();
-
+  
   // Clear drag state
-  this.classList.remove("drag-over");
+  this.classList.remove('drag-over');
   draggedItem = null;
   draggedItemIndex = null;
 }
@@ -133,7 +138,7 @@ function editTask(index) {
 function toggleTask(index) {
   todo[index].disabled = !todo[index].disabled;
   saveToLocalStorage();
-  displayTasks();
+  displayTasks(); // This will now automatically sort the items
 }
 
 function deleteAllTasks() {
